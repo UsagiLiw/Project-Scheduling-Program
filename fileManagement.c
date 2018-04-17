@@ -37,18 +37,24 @@ void projectNameList()
 	PROJECTLIST_T * pProject = NULL;
 	FILE * nameFile = NULL;
 	
-	nameFile = fopen("../savefile/projectList.txt","w");
+	nameFile = fopen("savefile/projectList.txt","r");
 	if(nameFile == NULL)
 	{
 		printf("ERROR - Unable to read project file, PROGRAM TERMINATED\n");
 		exit(0);
 	}
-	while(fgets(stringInput,sizeof(stringInput),nameFile) != 0)
+	while(fgets(stringInput,sizeof(stringInput),nameFile) != NULL)
 	{
 		memset(tempName,0,sizeof(tempName));
 		sscanf(stringInput,"%s",tempName);
+		pProject = (PROJECTLIST_T*) calloc(1,sizeof(PROJECTLIST_T));
+		if(pProject == NULL)
+		{
+			printf("ERROR - Unable to allocate memory for project list\n");
+			exit(1);
+		}
 		printf("\t%d.%s\n",count+1,tempName);
-		strncpy(pProject->projectName,tempName,sizeof(pProject->projectName));
+		strncpy(pProject->projectName,tempName,sizeof(pProject->projectName)-1);
 		if(pHead == NULL)
 		{
 			pHead = pTail = pProject;
@@ -66,6 +72,6 @@ void projectNameList()
 		pCurrent = pCurrent->pNext;
 		count++;
 	}
-	printf("Found %d projects stored\n",count+1);
+	printf("Found %d projects stored\n\n",count+1);
 	fclose(nameFile);
 }
