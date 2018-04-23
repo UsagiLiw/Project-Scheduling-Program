@@ -31,6 +31,7 @@ void choices()
 int loadFunction(int choice)
 {
 	char stringInput[32];
+	PROJECTLIST_T * pHead = NULL;
 
 	switch(choice)
 	{
@@ -42,6 +43,7 @@ int loadFunction(int choice)
 		case 2: /*Load existing project*/
 			printf("Load existing project\n");
 			projectNameList();
+			printf("%s\n",thisProject);
 			return 1;
 			break;
 		case 3: /*Open readme file*/
@@ -53,7 +55,7 @@ int loadFunction(int choice)
 			return 0;
 			break;
 		default:
-			printf("Error - Please choose the existed option\n\n");
+			printf("Error - Please choose the existed options\n\n");
 			return 1;
 			break;
 	}

@@ -1,0 +1,10 @@
+testproject;
+This is a testing file for project something something I don't know what to write here so just deal with it yadayada;
+Peam,Earth,Mill,Nutt;
+Design\This is the design process in which the ofwiefja;woeifeoijbeorijbeorijmmflwkemfweofkm\23\Peam,Mill;
+Build Program\Start buiding the program from the beginning to test how it would turn out\10\Peam,Earth,Mill,Nutt;
+Review\Look at what work and not in the program and report\2\Earth,Nutt;
+Improve\Improve the program to achieve a higher ground\50\Peam,Mill,Nutt;
+
+
+
