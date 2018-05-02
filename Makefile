@@ -16,14 +16,14 @@ EXECUTABLES= main$(EXECEXT)
 
 all : $(EXECUTABLES)
 
-fileManagement.o : fileManagement.c fileManagement.h
-	gcc -c fileManagement.c
+fileLoader.o : fileLoader.c fileLoader.h projectInfo.h
+	gcc -c fileLoader.c
 
-main.o : main.c fileManagement.h
+main.o : main.c fileLoader.h projectInfo.h
 	gcc -c main.c
 
-main$(EXECEXT) : main.o fileManagement.o 
-	gcc -o main$(EXECEXT) main.o fileManagement.o 
+main$(EXECEXT) : main.o fileLoader.o 
+	gcc -o main$(EXECEXT) main.o fileLoader.o 
 
 clean : 
 	-rm *.o

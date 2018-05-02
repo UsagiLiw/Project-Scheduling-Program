@@ -18,7 +18,8 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-#include "fileManagement.h"
+#include "fileLoader.h"
+#include "projectInfo.h"
 
 void choices()
 {
@@ -31,7 +32,10 @@ void choices()
 int loadFunction(int choice)
 {
 	char stringInput[32];
+	int returnValue = 0;
 	PROJECTLIST_T * pHead = NULL;
+
+	out = 1;	
 
 	switch(choice)
 	{
@@ -43,7 +47,10 @@ int loadFunction(int choice)
 		case 2: /*Load existing project*/
 			printf("Load existing project\n");
 			projectNameList();
-			printf("%s\n",thisProject);
+			if(out == 1)
+			{
+				readProject(thisProject);
+			}
 			return 1;
 			break;
 		case 3: /*Open readme file*/
