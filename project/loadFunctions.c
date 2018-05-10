@@ -19,7 +19,6 @@
 #include "abstractGraph.h"
 #include "projectInfo.h"
 
-
 /*	Ask for the task number that the user wants to
 	edit its status
 	ARGUMENTS:	taskString - the choosen task that the user wanted to edit
@@ -85,13 +84,17 @@ void displayOptions()
 			case 1: /*Update task status*/
 				printf("\nUpdate Task Status\n");
 				chooseTask(taskString);
-				updateTaskStatus(taskString);			/*added in linkedListGraph.c*/
+				if(updateTaskStatus(taskString) != 0);
+				{
+					saveEdit();
+				}
 				break;
 			case 2: /*Edit*/
 				printf("\nEdit\n");
 				break;
 			case 3: /*Delete project*/
 				printf("\nDelete Project\n");
+				deleteFile();
 				break;
 			case 4: /*Go back*/
 				printf("\nBack to main menu\n");

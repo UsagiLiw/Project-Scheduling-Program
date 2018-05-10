@@ -18,7 +18,6 @@
 #include "fileLoader.h"
 #include "projectInfo.h"
 
-
 /*	Free the linked list from the data stored
 	Arguments:	pHead - The head of the linked list that hold the first value
 */
@@ -34,45 +33,6 @@ void freeLinklist(PROJECTLIST_T * pHead)
 		pCurrent = pCurrent->pNext;
 		free(pDelete);
 	}
-}
-
-/*	Break up member names from a string so that we can store it in the struct
-	The names are being seperate by "," which act as a delimiter
-	Argrument: tempNameString - The string with all the member names
-								seperate by comma
-*/
-void breakNames(char * tempNameString)
-{
-	int count = 0;	
-	char * token;	
-	MEMBER_T * pCurrent = NULL;
-	MEMBER_T * pMember = NULL;
-
-	token = strtok(tempNameString,",");
-	printf("Member(s):\n");
-	do
-	{
-		pMember = (MEMBER_T*)calloc(1,sizeof(MEMBER_T));
-		if(pMember == NULL)
-		{
-			printf("Error - Unable to allocate memory for a new member\n");
-			exit(2);
-		} 
-		strcpy(pMember->memberName,token);
-		if(MEMBER == NULL)
-		{
-			MEMBER = pMember;
-		}
-		if(pCurrent == NULL)
-		{
-			pCurrent = MEMBER;
-		}
-		pCurrent = pCurrent->pNext;
-		printf("\t- %s\n",pMember->memberName);
-		count++;
-		token = strtok(NULL,",");
-	}while(token != NULL);
-	printf("\nFound %d members\n\n",count);
 }
 
 /*	Break up dependency information of the task 
@@ -113,13 +73,12 @@ void dependencyHandler(TASK_T * pCurrent,char * tempEdges)
 */
 void readTask(char * taskString)
 {
-	char tempNameString[1000];
 	char tempEdges[100];
 	char * token;
 	int retval = 0;
+	char name[128];
+	char tempNameString[1000];
 	TASK_T * pCurrent = NULL;
-	TASKMEMBER_T * pMember = NULL;
-	TASKMEMBER_T * pCurrentMember = NULL;
 
 	pCurrent = (TASK_T*)calloc(1,sizeof(TASK_T));
 	if(pCurrent == NULL)
@@ -127,38 +86,23 @@ void readTask(char * taskString)
 		printf("Error - Unable to allocate memory for a new task\n");
 		exit(2);
 	}
-	sscanf(taskString,"%d|%[^|]|%[^|]|%d|%[^|]|%[^|]|%d;",&pCurrent->taskNumber
-														,pCurrent->Topic
+	sscanf(taskString,"%[^|]|%[^|]|%d|%[^|]|%[^|]|%d;",pCurrent->Topic
 														,pCurrent->taskDescription
 														,&pCurrent->Duration
 														,tempNameString
 														,tempEdges
 														,&pCurrent->Status);
-	printf("|%d| %s\n",pCurrent->taskNumber,pCurrent->Topic);
+	printf("\n|%s|\n",pCurrent->Topic);
 	printf("\t%s\n",pCurrent->taskDescription);
 	printf("Duration: %d days\n",pCurrent->Duration);
 	printf("Responsible members:\n");
+	strcpy(pCurrent->memberNameString,tempNameString);
+	strcpy(pCurrent->dependencyString,tempEdges);
 	token = strtok(tempNameString,",");
 	do
 	{
-		pMember = (TASKMEMBER_T*)calloc(1,sizeof(TASKMEMBER_T));
-		if(pMember == NULL)
-		{
-			printf("Error - Unable to allocate memory for a new member\n");
-			exit(2);
-		} 
-		strcpy(pMember->name,token);
-		if(pCurrent->taskMember == NULL)
-		{
-			pCurrent->taskMember = pMember;
-		}
-		if(pCurrentMember == NULL)
-		{
-			pCurrentMember = pCurrent->taskMember;
-		}
-		pCurrentMember = pCurrentMember->pNext;
-		printf("\t- %s\n",pCurrent->taskMember->name);
-		pCurrent->taskMember = pCurrent->taskMember->pNext;
+		strcpy(name,token);
+		printf("\t- %s\n",name);
 		token = strtok(NULL,",");	
 	}while(token != NULL);
 	if(pCurrent->Status == 1)
@@ -173,8 +117,9 @@ void readTask(char * taskString)
 /*	Read the data within the project file and store and
 	show the file
 	Argument:	thisProject - the name of the project file that the user chooses
+	RETURN:		status - to say whether to progress to the next operation or not
 */
-void readProject(char * thisProject)
+int readProject(char * thisProject)
 {
 	FILE * project = NULL;
 	char textType[] = ".txt";
@@ -182,15 +127,18 @@ void readProject(char * thisProject)
 	char stringInput[1000];
 	char tempNameString[1000];
 	int numberOfTask = 0;
+	int status = 0;
 	TASK_T * pCurrent = NULL;
 	TASK_T * pTask = NULL;
-	
+		
 	strcat(thisProject,textType);
 	strcat(projectName,thisProject);
+	strcpy(thisProject,projectName);
 	project = fopen(projectName,"r");
 	if(project == NULL)
 	{
-		printf("Error - Unable to find the designated project\n");
+		printf("Error - Unable to find the designated project\n\n");
+		status = 0;
 	}
 	else
 	{
@@ -221,8 +169,10 @@ void readProject(char * thisProject)
 				continue;
 			readTask(stringInput);	
 		}
-		fclose(project);							
+		fclose(project);	
+		status = 1;						
 	}
+	return status;
 }
 
 /*	Let the user chooses the project they want

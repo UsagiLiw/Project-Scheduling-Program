@@ -47,8 +47,8 @@ int loadFunction(int choice)
 	switch(choice)
 	{
 		case 1:	/*Create new project*/
-			printf("Create new project\n");
-			printf("\tNot yet implemented\n\n");
+			printf("Create new project\n\n");
+			newProject();
 			return 1;
 			break;
 		case 2: /*Load existing project and choose the actions*/
@@ -56,8 +56,11 @@ int loadFunction(int choice)
 			projectNameList();
 			if(out == 1)
 			{
-				readProject(thisProject);
-				displayOptions();
+				if(readProject(thisProject) != 0)
+				{
+					
+					displayOptions();
+				}
 			}
 			return 1;
 			break;

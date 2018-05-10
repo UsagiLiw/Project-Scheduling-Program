@@ -29,36 +29,9 @@
 
 char* colorName[] = {"WHITE", "GRAY", "BLACK"};
 
-/* List items for the adjacency list.
- * Each one represents an edge leading to an existing vertex
- */
-typedef struct _adjVertex
-{
-    void * pVertex;           /* pointer to the VERTEX_T this 
-                               * item refers to.
-                               */
-    struct _adjVertex* next;  /* next item in the ajacency list */ 
-} ADJACENT_T;
-
-/* List items for the main vertex list.*/
-typedef struct _vertex
-{
-    char * key;               /* key for this vertex */
-    TASK_T * data;              /* additional data for this vertex */
-    int color;                /* used to mark nodes as visited */
-    struct _vertex * next;    /* next vertex in the list */
-	struct _vertex * fromVertex;  /* vertex that arrive from */
-    ADJACENT_T * adjacentHead;    /* pointer to the head of the
-		                   * adjacent vertices list
-                                   */
-    ADJACENT_T * adjacentTail;    /* pointer to the tail of the
-			           * adjacent vertices list
-                                   */
-}  VERTEX_T;
-
-
 VERTEX_T * vListHead = NULL;  /* head of the vertex list */
 VERTEX_T * vListTail = NULL;  /* tail of the vertex list */
+
 int bGraphDirected = 0;       /* if true, this is a directed graph */
 int countVertex = 0;          /* keep the number of vertices*/
 
@@ -222,32 +195,32 @@ void colorAll(int color)
  */
 void traverseBreadthFirst(VERTEX_T* pVertex, void (*vFunction)(VERTEX_T*))
 {
-    VERTEX_T * pCurrent = NULL;
-    VERTEX_T * pAdjacent = NULL;    
-    queueClear();
-    colorAll(WHITE);
-    pVertex->color = GRAY;
-    enqueue(pVertex);
-    while (queueSize() > 0)
-       {
-       pCurrent = (VERTEX_T*) dequeue();
-       if (pCurrent->color != BLACK)
-          {
-          (*vFunction)(pCurrent);
-          pCurrent->color = BLACK;
-	  ADJACENT_T* pRef = pCurrent->adjacentHead;
-	  while (pRef != NULL)
-             {
-	     pAdjacent = (VERTEX_T*) pRef->pVertex;
-	     if (pAdjacent->color == WHITE)
-	         {
-		 pAdjacent->color = GRAY;
-		 enqueue(pAdjacent);
-	         }
-	     pRef = pRef->next;
-             }
-	  }
-       } /* end while queue has data */
+	VERTEX_T * pCurrent = NULL;
+	VERTEX_T * pAdjacent = NULL;    
+	queueClear();
+	colorAll(WHITE);
+	pVertex->color = GRAY;
+	enqueue(pVertex);
+	while (queueSize() > 0)
+	{
+		pCurrent = (VERTEX_T*) dequeue();
+		if (pCurrent->color != BLACK)
+		{
+			(*vFunction)(pCurrent);
+			pCurrent->color = BLACK;
+			ADJACENT_T* pRef = pCurrent->adjacentHead;
+			while (pRef != NULL)
+			{
+				pAdjacent = (VERTEX_T*) pRef->pVertex;
+				if (pAdjacent->color == WHITE)
+				{
+					pAdjacent->color = GRAY;
+					enqueue(pAdjacent);
+				}
+				pRef = pRef->next;
+			}
+		}
+	} /* end while queue has data */
 }
 
 
@@ -259,44 +232,39 @@ void traverseBreadthFirst(VERTEX_T* pVertex, void (*vFunction)(VERTEX_T*))
  */
 void traverseDepthFirst(VERTEX_T* pVertex, void (*vFunction)(VERTEX_T*))
 {
-    VERTEX_T * pAdjacent = NULL;    
-    ADJACENT_T* pRef = pVertex->adjacentHead;
-    while (pRef != NULL)
-       {
-       pAdjacent = (VERTEX_T*) pRef->pVertex;
-       if (pAdjacent->color == WHITE)
-	   {
-	   pAdjacent->color = GRAY;
-           traverseDepthFirst(pAdjacent,vFunction);
-           }
-       pRef = pRef->next;  
-       } /* end while queue has data */
-    /* when we return from the bottom, call the 
-     * function and color this node black.
-     */
-    (*vFunction)(pVertex);
-    pVertex->color = BLACK;
+	VERTEX_T * pAdjacent = NULL;    
+	ADJACENT_T* pRef = pVertex->adjacentHead;
+	while (pRef != NULL)
+	{
+		pAdjacent = (VERTEX_T*) pRef->pVertex;
+		if (pAdjacent->color == WHITE)
+		{
+			pAdjacent->color = GRAY;
+			traverseDepthFirst(pAdjacent,vFunction);
+		}
+		pRef = pRef->next;  
+	} /* end while queue has data */
+	/* when we return from the bottom, call the 
+	* function and color this node black.
+	*/
+	(*vFunction)(pVertex);
+	pVertex->color = BLACK;
 }
 
-/*
+
 /* Function to print the information about a vertex
  * Argument  
  *   pVertex   -   vertex we want to print
  */
 void printVertexInfo(VERTEX_T* pVertex)
 {
-    printf("|%d| - |%s|\n",pVertex->data->taskNumber, pVertex->data->Topic);
-	
+    printf("   |%s|",pVertex->data->Topic);
 	if(pVertex->data->Status == 1)
-	{
-		printf("Status: DONE\n");
-	}
+		printf(" - |DONE|\n");
 	else
-	{
-		printf("Status: IN PROGRESS\n");
-	}
+		printf(" - |IN PROGRESS|\n");
+						
 }
-
 
 /********************************/
 /** Public functions start here */
@@ -359,37 +327,37 @@ void clearGraph()
  */
 int addVertex(char* key, void* pData)
 {
-    int bOk = 1;
-    VERTEX_T * pPred;
-    VERTEX_T * pFound = findVertexByKey(key, &pPred);
-    if (pFound != NULL)  /* key is already in the graph */
-       {
-       bOk = -1;
-       }
-    else
-       {
-       VERTEX_T * pNewVtx = (VERTEX_T *) calloc(1,sizeof(VERTEX_T));
-       char * pKeyval = strdup(key);
-       if ((pNewVtx == NULL) || (pKeyval == NULL))
-          {
-	  bOk = 0;  /* allocation error */
-	  }
-       else
-          {
-	  pNewVtx->key = pKeyval;
-          pNewVtx->data = pData;
-	  if (vListHead == NULL)  /* first vertex */
-	     {
-	     vListHead = pNewVtx;
-	     }
-	  else
-	     {
-	     vListTail->next = pNewVtx; 
-	     }
-	  vListTail = pNewVtx;
-	  }
-       }
-    return bOk;
+	int bOk = 1;
+	VERTEX_T * pPred;
+	VERTEX_T * pFound = findVertexByKey(key, &pPred);
+	if (pFound != NULL)  /* key is already in the graph */
+	{
+		bOk = -1;
+	}
+	else
+	{
+		VERTEX_T * pNewVtx = (VERTEX_T *) calloc(1,sizeof(VERTEX_T));
+		char * pKeyval = strdup(key);
+		if ((pNewVtx == NULL) || (pKeyval == NULL))
+		{
+			bOk = 0;  /* allocation error */
+		}
+		else
+		{
+			pNewVtx->key = pKeyval;
+			pNewVtx->data = pData;
+			if (vListHead == NULL)  /* first vertex */
+			{
+				vListHead = pNewVtx;
+			}
+			else
+			{
+				vListTail->next = pNewVtx; 
+			}
+			vListTail = pNewVtx;
+		}
+	}
+	return bOk;
 }
 
 
@@ -443,58 +411,58 @@ int addEdge(char* key1, char* key2)
     VERTEX_T * pDummy = NULL;
     VERTEX_T * pFromVtx = findVertexByKey(key1,&pDummy);
     VERTEX_T * pToVtx = findVertexByKey(key2,&pDummy);
-    if ((pFromVtx == NULL) || (pToVtx == NULL))
-       {
-       bOk = 0;
-       }
-    else if (edgeExists(pFromVtx,pToVtx))
-       {
-       bOk = -1;	   
-       }
-    else
-       {
-       ADJACENT_T * pNewRef = (ADJACENT_T*) calloc(1,sizeof(ADJACENT_T));
-       if (pNewRef == NULL)
-          {
-	  bOk = 0;
-          }
-       else
-          {
-	  pNewRef->pVertex = pToVtx;
-	  if (pFromVtx->adjacentTail != NULL)
-              {
-	      pFromVtx->adjacentTail->next = pNewRef;
-	      }
-          else
-	      {
-	      pFromVtx->adjacentHead = pNewRef;
-	      }
-	  pFromVtx->adjacentTail = pNewRef;
-          } 
-       } 
-    /* If undirected, add an edge in the other direction */
-    if ((bOk) && (!bGraphDirected))
-       {
-       ADJACENT_T * pNewRef2 = (ADJACENT_T*) calloc(1,sizeof(ADJACENT_T));
-       if (pNewRef2 == NULL)
-          {
-	  bOk = 0;
-          }
-       else
-          {
-	  pNewRef2->pVertex = pFromVtx;
-	  if (pToVtx->adjacentTail != NULL)
-              {
-	      pToVtx->adjacentTail->next = pNewRef2;
-	      }
-          else
-	      {
-	      pToVtx->adjacentHead = pNewRef2;
-	      }
-	  pToVtx->adjacentTail = pNewRef2;
-          } 
-       } 
-    return bOk;
+	if ((pFromVtx == NULL) || (pToVtx == NULL))
+	{
+		bOk = 0;
+	}
+	else if (edgeExists(pFromVtx,pToVtx))
+	{
+		bOk = -1;	   
+	}
+	else
+	{
+		ADJACENT_T * pNewRef = (ADJACENT_T*) calloc(1,sizeof(ADJACENT_T));
+		if (pNewRef == NULL)
+		{
+			bOk = 0;
+		}
+		else
+		{
+			pNewRef->pVertex = pToVtx;
+			if (pFromVtx->adjacentTail != NULL)
+		  	{
+				pFromVtx->adjacentTail->next = pNewRef;
+			}
+			else
+			{
+				pFromVtx->adjacentHead = pNewRef;
+			}
+			pFromVtx->adjacentTail = pNewRef;
+		} 
+	} 
+	/* If undirected, add an edge in the other direction */
+	if ((bOk) && (!bGraphDirected))
+	{
+		ADJACENT_T * pNewRef2 = (ADJACENT_T*) calloc(1,sizeof(ADJACENT_T));
+		if (pNewRef2 == NULL)
+		{
+			bOk = 0;
+		}
+		else
+		{
+			pNewRef2->pVertex = pFromVtx;
+			if (pToVtx->adjacentTail != NULL)
+			{
+				pToVtx->adjacentTail->next = pNewRef2;
+			}
+			else
+			{
+				pToVtx->adjacentHead = pNewRef2;
+			}
+			pToVtx->adjacentTail = pNewRef2;
+		} 
+	} 
+	return bOk;
 }
 
 
@@ -615,34 +583,42 @@ void* findVertex(char* key)
  */
 char** getAdjacentVertices(char* key, int* pCount)
 {
-    char** keyArray = NULL;
-    VERTEX_T * pDummy = NULL;
-    VERTEX_T * pFoundVtx = findVertexByKey(key,&pDummy);
-    if (pFoundVtx != NULL)
-       {
-       *pCount = countAdjacent(pFoundVtx);
-       if (*pCount > 0)
-          {
-	  int i = 0;
-	  keyArray = (char**) calloc(*pCount, sizeof(char*));
-          if (keyArray != NULL)
-	     {
-	     ADJACENT_T * pAdjacent = pFoundVtx->adjacentHead;
-	     while (pAdjacent != NULL)
-	        {
-		VERTEX_T* pVertex = (VERTEX_T*) pAdjacent->pVertex;
-		keyArray[i] = strdup(pVertex->key);
-		pAdjacent = pAdjacent->next;
-		i += 1;
-	        }
-	     }
-          } 
-       } 
-    else
-       {
-       *pCount = -1;
-       }
-    return keyArray;
+	char** keyArray = NULL;
+	VERTEX_T * pDummy = NULL;
+	VERTEX_T * pFoundVtx = findVertexByKey(key,&pDummy);
+	if (pFoundVtx != NULL)
+	{
+		*pCount = countAdjacent(pFoundVtx);
+		if (*pCount > 0)
+		{
+			int i = 0;
+			keyArray = (char**) calloc(*pCount, sizeof(char*));
+			if (keyArray != NULL)
+			{
+				ADJACENT_T * pAdjacent = pFoundVtx->adjacentHead;
+				while (pAdjacent != NULL)
+				{
+					VERTEX_T* pVertex = (VERTEX_T*) pAdjacent->pVertex;
+					/*Modify so that the task that has been mark as done won't show up too*/					
+					if(pVertex->data->Status == 1)
+					{
+						*pCount -= 1;
+					}
+					else
+					{
+						keyArray[i] = strdup(pVertex->key);
+						i += 1;
+					}
+					pAdjacent = pAdjacent->next;
+				}
+			}
+		} 
+	} 
+	else
+	{
+		*pCount = -1;
+	}
+	return keyArray;
 }
 
 
@@ -787,11 +763,14 @@ int isReachable(char* key1, char* key2)
 /*	Handle the operation to update the status
 	of the specify task
 	ARGUMENTS:	taskString - the task name that the user wants to find
+	RETURN:		status - integer indicate the status of whether the user choose
+					to do something or not
 */
-void updateTaskStatus(char * taskString)
+int updateTaskStatus(char * taskString)
 {
 	VERTEX_T * pDummy = NULL;
 	VERTEX_T * pVTX = findVertexByKey(taskString,&pDummy);	
+	int status = 0;
 	char answer[32];
 	
 	if(pVTX->data->Status == 1)
@@ -804,7 +783,8 @@ void updateTaskStatus(char * taskString)
 			if ((answer[0] == 'Y') || (answer[0] == 'y'))
 			{
 				pVTX->data->Status = -1;
-				printf("%s: |DONE| -> |IN PROGRESS|\n",pVTX->data->Topic); 
+				printf("%s: |DONE| -> |IN PROGRESS|\n",pVTX->data->Topic);
+				status = 1; 
 				break;
 			}
 			else if((answer[0] == 'N') || (answer[0] == 'n'))
@@ -821,8 +801,9 @@ void updateTaskStatus(char * taskString)
 			fgets(answer,sizeof(answer),stdin);
 			if ((answer[0] == 'Y') || (answer[0] == 'y'))
 			{
-				pVTX->data->Status = -1;
+				pVTX->data->Status = 1;
 				printf("%s: |IN PROGRESS| -> |DONE|\n",pVTX->data->Topic); 
+				status = 1;
 				break;
 			}
 			else if((answer[0] == 'N') || (answer[0] == 'n'))
@@ -831,6 +812,8 @@ void updateTaskStatus(char * taskString)
 				printf("Error - Wrong answer\n");
 		}
 	}
+	return status;
 }
+
 
  

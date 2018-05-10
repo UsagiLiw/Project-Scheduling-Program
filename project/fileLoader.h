@@ -20,13 +20,6 @@ typedef struct _projectlist
 */
 void freeLinklist(PROJECTLIST_T * pHead);
 
-/*	Break up member names from a string so that we can store it in the struct
-	The names are being seperate by "," which act as a delimiter
-	Argrument: tempNameString - The string with all the member names
-								seperate by comma
-*/
-void breakNames(char * tempNameString);
-
 /*	Read and break up data of each task.
 	Information of each task is stored as a line with delimeters to 
 	divide the type of data
@@ -40,7 +33,7 @@ void readTask(char * taskString);
 	show the file
 	Argument:	thisProject - the name of the project file that the user chooses
 */
-void readProject(char * thisProject);
+int readProject(char * thisProject);
 
 /*	Let the user chooses the project they want
 	to load, the program then find the project name from the linked list
@@ -51,6 +44,7 @@ void chooseProject(PROJECTLIST_T * pHead,int count);
 /*	Handle the read and store the project names 
 	that exist within the database
 	Argument:	pHead - The head of the linked list that hold the first value
+	RETURN:		status - to say whether to progress to the next operation or not
 */
 void projectNameList();
 

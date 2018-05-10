@@ -9,12 +9,6 @@
 #ifndef ABSTRACTGRAPH_H
 #define ABSTRACTGRAPH_H
 
-/*	Handle the operation to update the status
-	of the specify task
-	ARGUMENTS:	taskString - the task name that the user wants to find
-*/
-void updateTaskStatus(char * taskString);
-
 /* Initialize the graph.
  * Argument 
  *    maxVertices  - how many vertices can this graph
@@ -129,4 +123,11 @@ void printDepthFirst();
  */
 int isReachable(char* key1, char* key2);
 
+/*	Handle the operation to update the status
+	of the specify task
+	ARGUMENTS:	taskString - the task name that the user wants to find
+	RETURN:		integer indicate the status of whether the user choose
+					to do something or not
+*/
+int updateTaskStatus(char * taskString);
 #endif
