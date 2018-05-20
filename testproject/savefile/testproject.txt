@@ -1,0 +1,12 @@
+testproject;
+This is a testing file for project something something I don't know what to write here so just deal with it yadayada;
+Peam,Earth,Mill,Nutt;
+5;
+Design|This is the design process in which the ofwiefjawoeifeoijbeorijbeorijmmflwkemfweofkm|23|Peam,Mill|NONE|1;
+Build Program|Start buiding the program from the beginning to test how it would turn out|10|Peam,Earth,Mill,Nutt|Design|-1;
+Review|Look at what work and not in the program and report|2|Earth|NONE|-1;
+Improve|Improve the program to achieve a higher ground|50|Peam,Mill,Nutt|Design,Build Program,Review|-1;
+FailMiserably|In this task we failed to create a good project and were burned to hell|1|Peam,Earth,Mill,Nutt|Review|-1;
+
+
+
