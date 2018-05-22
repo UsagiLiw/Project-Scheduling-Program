@@ -1,0 +1,11 @@
+oiawefoawiejf;
+2018-03-12;
+somethning;
+peam,mill,earth,nutt;
+6;
+1|1|23|mill|NONE|-1;
+2|2|2|earth|NONE|-1;
+3|3|3|earth|NONE|-1;
+4|4|4|peam|3|-1;
+5|5|5|mill|4|-1;
+6|6|6|nutt|5|-1;
