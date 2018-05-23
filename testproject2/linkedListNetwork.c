@@ -169,14 +169,14 @@ void removeReferences(VERTEX_T * pTarget)
  */
 int countAdjacent(VERTEX_T * pVertex)
 {
-    int count = 0;
-    ADJACENT_T * pAdjacent = pVertex->adjacentHead;
-    while (pAdjacent != NULL)
-       {
-       count += 1;
-       pAdjacent = pAdjacent->next;
-       }
-    return count;
+	int count = 0;
+	ADJACENT_T * pAdjacent = pVertex->adjacentHead;
+	while (pAdjacent != NULL)
+	{
+		count += 1;
+		pAdjacent = pAdjacent->next;
+	}
+	return count;
 }
 
 /* Set all vertices to the passed color.
@@ -676,7 +676,57 @@ char** getAdjacentVertices(char* key, int* pCount)
 	return keyArray;
 }
 
-
+char ** getDependencyVertices(char * key, int * adjCount)
+{
+	char ** keyArray = NULL;
+	int count = 0, i, j;
+	int matchCount = 0;
+	char ** adjacentKeys = NULL;
+	VERTEX_T * pVertex = vListHead;
+	while(pVertex != NULL)
+	{
+		adjacentKeys = getAdjacentVertices(pVertex->key,&count);
+		if(count > 0)
+		{
+			for(i = 0; i < count; i++)
+			{
+				if(strcmp(key,adjacentKeys[i]) == 0)
+				{	
+					matchCount += 1;
+				}
+				free(adjacentKeys[i]);
+			}
+			free(adjacentKeys);
+		}
+		pVertex = pVertex->next;
+	}
+	*adjCount = matchCount;
+	pVertex = vListHead;
+	keyArray = (char**) calloc(*adjCount, sizeof(char*));
+	j = 0;
+	if(*adjCount != 0)
+	{
+		while(pVertex != NULL)
+		{
+			adjacentKeys = getAdjacentVertices(pVertex->key,&count);
+			if(count > 0)
+			{
+				for(i = 0; i < count; i++)
+				{
+					if(strcmp(key,adjacentKeys[i]) == 0)
+					{	
+						keyArray[j] = strdup(pVertex->data->Topic);
+						j++;
+					}
+					free(adjacentKeys[i]);
+				}
+				free(adjacentKeys);
+			}
+			pVertex = pVertex->next;
+		}
+	}
+	return keyArray;
+}
 
 /* Print out all the nodes reachable from a node by a 
  * breadth-first search.
@@ -855,9 +905,9 @@ int printShortestPath(char* startKey, char* endKey)
 	return pathWeight;
 }
 
-void printCriticalPath()
+int printCriticalPath()
 {
-	char ENDVERTEX[] = "ENDVERTEX";
+	char ENDVERTEX[] = "END";
 	int maxValue = 0;
 	VERTEX_T * pCurrent = NULL;
 	VERTEX_T * pDummy = NULL;
@@ -869,7 +919,7 @@ void printCriticalPath()
 	pCurrent = vListHead;
 	while(pCurrent != NULL)
 	{
-		if(pCurrent != pEnd)
+		if((pCurrent != pEnd) && (pCurrent->data->Status != 1))
 		{
 			addEdge(pCurrent->key,pEnd->key,pCurrent->data->Duration);
 			enqueueMin(pCurrent);
@@ -894,9 +944,12 @@ void printCriticalPath()
 			pAdjacentEdge = pAdjacentEdge->next; 
 		}
 	}
+	maxValue = pEnd->dValue;
+	printf("Expected project duration (Critical Path): %d days\n",maxValue);
 	printPath(pEnd);
+	printf("\n");
 	removeVertex(ENDVERTEX);
-	
+	return maxValue;	
 }
 
 /*	Handle the operation to update the status
@@ -907,8 +960,8 @@ void printCriticalPath()
 */
 int updateTaskStatus(char * taskString)
 {
-	VERTEX_T * pDummy = NULL;
-	VERTEX_T * pVTX = findVertexByKey(taskString,&pDummy);	
+	VERTEX_T * pDummy;
+	VERTEX_T * pVTX = findVertexByKey(taskString,&pDummy);
 	int status = 0;
 	char answer[32];
 	
@@ -921,8 +974,8 @@ int updateTaskStatus(char * taskString)
 			fgets(answer,sizeof(answer),stdin);
 			if ((answer[0] == 'Y') || (answer[0] == 'y'))
 			{
-				pVTX->data->Status = -1;
-				printf("%s: |DONE| -> |IN PROGRESS|\n",pVTX->data->Topic);
+				pVTX->data->Status = 0;
+				printf("\t%s: |DONE| -> |IN PROGRESS|\n",pVTX->data->Topic);
 				status = 1; 
 				break;
 			}
@@ -941,7 +994,7 @@ int updateTaskStatus(char * taskString)
 			if ((answer[0] == 'Y') || (answer[0] == 'y'))
 			{
 				pVTX->data->Status = 1;
-				printf("%s: |IN PROGRESS| -> |DONE|\n",pVTX->data->Topic); 
+				printf("\t%s: |IN PROGRESS| -> |DONE|\n",pVTX->data->Topic); 
 				status = 1;
 				break;
 			}
@@ -953,6 +1006,7 @@ int updateTaskStatus(char * taskString)
 	}
 	return status;
 }
+
 
 
 

@@ -111,6 +111,8 @@ int findEdge(char* key1, char* key2);
  */
 char** getAdjacentVertices(char* key, int* pCount);
 
+char ** getDependencyVertices(char * key, int * adjCount);
+
 
 /* Print out all the nodes reachable from a node by a 
  * breadth-first search.
@@ -137,7 +139,7 @@ void printDepthFirst();
  */
 int printShortestPath(char* startKey, char* endKey);
 
-void printCriticalPath();
+int printCriticalPath();
 
 /*	Handle the operation to update the status
 	of the specify task

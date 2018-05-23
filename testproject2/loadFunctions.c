@@ -9,7 +9,6 @@
 	DATE: 17/04/2018
 **********************************************/
 
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -23,39 +22,57 @@
 	edit its status
 	ARGUMENTS:	taskString - the choosen task that the user wanted to edit
 */
-void chooseTask(char * taskString)
+int chooseTask(char * taskString)
 {
-	int count = 0;
-	int i = 0;
-	char stringInput[64];	
-	char ** adjacentKeys = NULL;
+	int count = 0,i;
+	char stringInput[128];	
+	int status = 1;
+	int inCount = 0;
+	char ** adjacentKeys;
+	TASK_T * pCurrent = NULL;
+	TASK_T * pDepen = NULL;
+	VERTEX_T * pVertex2 = vListHead;
 	
-	while(1)
+	printf("\nPlease enter the task name that you want to update\n");
+	printf("Choose: ");
+	fgets(stringInput,sizeof(stringInput),stdin);
+	sscanf(stringInput,"%[^\n]",taskString);
+	pCurrent = findVertex(taskString);
+	if(pCurrent == NULL)
 	{
-		printf("\nPlease enter the task name that you want to update\n");
-		printf("Choose: ");
-		fgets(stringInput,sizeof(stringInput),stdin);
-		sscanf(stringInput,"%[^\n]",taskString);
-		adjacentKeys = getAdjacentVertices(taskString,&count);
-		if(count < 0)
+		printf("Error - Unable to find | %s | within existed task\n",taskString);
+		status = 0;
+	}
+	else
+	{
+		printf("Prior requirements: ");
+		adjacentKeys = getDependencyVertices(pCurrent->Topic,&count);
+		if(count < 1)
 		{
-			printf("Error - %s is not within the existing tasks\n",taskString);
-		}
-		else if(count > 0)
-		{
-			printf("Task: |%s| has previous required tasks to be done first\n",taskString);
-			printf("Included:\n");
-			for (i = 0; i < count; i++)
-			{
-				printf("\t- %s\n",adjacentKeys[i]);
-				free(adjacentKeys[i]);
-			}
-			printf("\n");
-			free(adjacentKeys);
+			status = 1;
+			printf("No prior requirement\n\n");
 		}
 		else
-			break;		
-	}	
+		{
+			for(i = 0; i < count; i++)
+			{
+				pDepen = findVertex(adjacentKeys[i]);
+				if(pDepen->Status != 1)
+				{
+					printf("\n\t - %s",adjacentKeys[i]);
+					status = 0;
+				}
+				free(adjacentKeys[i]);
+			}
+			if(status != 0)
+			{
+				printf("NONE");
+			}
+			printf("\n\n");
+		}
+		free(adjacentKeys);
+	}
+	return status;
 }
 
 /*	Show the user what option they have after 
@@ -74,7 +91,7 @@ void displayOptions()
 
 	while(status != 0)
 	{
-		printf("What do you want to do next?:\n");
+		printf("\nWhat do you want to do next?:\n");
 		printf("\t1.Update task status\n");
 		printf("\t2.Edit\n");
 		printf("\t3.Delete Project\n");
@@ -86,41 +103,20 @@ void displayOptions()
 		{
 			case 1: /*Update task status*/
 				printf("\nUpdate Task Status\n");
-				chooseTask(taskString);
-				if(updateTaskStatus(taskString) != 0);
-				{
-					printCriticalPath();
-					saveEdit();
+				memset(taskString,0,sizeof(taskString));
+				if(chooseTask(taskString) != 0)
+				{	
+					if(updateTaskStatus(taskString) != 0);
+					{
+						printCriticalPath();
+					}
 				}
 				break;
 			case 2: /*Edit*/
 				printf("\nEdit\n");
 				chooseEdit();
-				while(1)
-				{
-					printf("Do you want to save your changes?\n");
-					printf("[Y/N] :");
-					fgets(stringInput,sizeof(stringInput),stdin);
-					if ((stringInput[0] == 'Y') || (stringInput[0] == 'y'))
-					{
-						strcat(projectDirectory,thisProject);
-						strcat(projectDirectory,projectType);
-						ret = remove(projectDirectory);
-						if(ret != 0)
-						{
-							printf("Error -  Unable to delete the old %s project\n",thisProject);
-							exit(3);
-						}
-						printCriticalPath();
-						saveEdit();
-						break;
-					}
-					else if((stringInput[0] == 'N') || (stringInput[0] == 'n'))
-					{
-						break;
-					}
-				}
 				printProjectInfo();
+				printCriticalPath();
 				break;
 			case 3: /*Delete project*/
 				printf("\nDelete Project\n");
@@ -129,6 +125,8 @@ void displayOptions()
 				break;
 			case 4: /*Go back*/
 				printf("\nBack to main menu\n");
+				printProjectInfo();				
+				//saveEdit();
 				status = 0;
 				break;
 			default:

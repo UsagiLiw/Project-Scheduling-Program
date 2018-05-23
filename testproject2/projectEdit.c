@@ -18,14 +18,16 @@
 void updateDependency()
 {
 	int choose = 0;
-	int count = 0,i;
 	int status = 1;
 	char stringInput[128];
 	char choseTask[128];
 	char fromTask[128];	
 	char toTask[128];
-	char ** adjacentKeys = NULL;
+	TASK_T * pCurrent;
+	char ** adjacentKeys;
+	int count = 0,i;	
 
+	printDepthFirst();
 	while(status != 0)
 	{
 		printf("What do you want to do?\n");
@@ -39,30 +41,30 @@ void updateDependency()
 		switch(choose)
 		{
 			case 1: /*show dependency*/
-				printDepthFirst();
 				printf("Choose Task : ");
 				memset(stringInput,0,sizeof(stringInput));
 				fgets(stringInput,sizeof(stringInput),stdin);
 				sscanf(stringInput,"%[^\n]",choseTask);
-				adjacentKeys = getAdjacentVertices(choseTask,&count);
-				if(count < 0)
+				pCurrent = findVertex(choseTask);
+				if(pCurrent == NULL)
 				{
-					printf("Error - %s is not within the existing tasks\n",choseTask);
-				}
-				else if(count > 0)
-				{
-					printf("Included:\n");
-					for (i = 0; i < count; i++)
-					{
-						printf("\t- %s\n",adjacentKeys[i]);
-						free(adjacentKeys[i]);
-					}
-					printf("\n");
-					free(adjacentKeys);
+					printf("Error - Unable to find %s within existing task\n\n",choseTask);
 				}
 				else
 				{
-					printf("\tNo prior requirement\n");
+					adjacentKeys = getDependencyVertices(choseTask,&count);
+					if(count > 0)
+					{
+						for(i = 0; i < count; i++)
+						{
+							printf("\n\t - %s",adjacentKeys[i]);
+							free(adjacentKeys[i]);
+						}
+						printf("\n\n");
+						free(adjacentKeys);
+					}
+					else
+						printf("No prior requirement\n\n");
 				}
 				break;
 			case 2: /*Add dependency*/
@@ -71,7 +73,6 @@ void updateDependency()
 			case 3: /*Remove dependency*/
 				while(1)
 				{
-					status = 0;
 					memset(stringInput,0,sizeof(stringInput));
 					printf("Please specify the dependency to be remove\n");
 					printDepthFirst();
@@ -329,6 +330,7 @@ void updateMember()
 						pTail = pPred;
 					}
 					free(pFound);
+					memCount--;
 				}
 				break;
 			case 3:
@@ -341,8 +343,6 @@ void updateMember()
 		choose = 0;
 				
 	}
-
-
 }
 
 void chooseEdit()
@@ -350,48 +350,26 @@ void chooseEdit()
 	int choose = 0;
 	int task = 0;
 	int status = 1;
-	char stringInput[32];
+	char stringInput[1000];
 	char taskString[100];
 
 	while(status != 0)
 	{
 		printf("What do you want to edit?:\n");
-		printf("\t1.Project Name\n");
-		printf("\t2.Starting Date\n");
-		printf("\t3.Project Description\n");
-		printf("\t4.Project Member\n");
-		printf("\t5.Task\n");
-		printf("\t6.Dependency\n");
-		printf("\t7.Back to load menu\n");
+		printf("\t1.Starting Date\n");
+		printf("\t2.Project Description\n");
+		printf("\t3.Project Member\n");
+		printf("\t4.Task\n");
+		printf("\t5.Dependency\n");
+		printf("\t6.Back to load menu\n");
 	
 		printf("Choose :");
 		fgets(stringInput,sizeof(stringInput),stdin);
 		sscanf(stringInput,"%d",&choose);
 		switch(choose)
 		{
-			case 1:	/*Edit project name*/
-				while(1)
-				{
-					printf("Update project name to : \n");
-					memset(stringInput,0,sizeof(stringInput));	
-					fgets(stringInput,sizeof(stringInput),stdin);
-					if(strcmp(stringInput,"\n") == 0)
-					{
-						printf("Error - Cannot leave project name empty\n\n");
-						continue;
-					}
-					if(symbolCheck(stringInput) == 0)
-					{
-						printf("Error - < ; | , > symbols are not allow in the input\n\n");
-						continue;
-					}
-					sscanf(stringInput,"%[^\n]",CHOSENPROJECT.projectName);
-					strcpy(thisProject,CHOSENPROJECT.projectName);
-					printf("\n\n");
-					break;
-				}
-				break;
-			case 2:	/*Starting Date*/
+
+			case 1:	/*Starting Date*/
 				while(1)
 				{
 					printf("Change starting date to [yyyy-mm-dd]: ");
@@ -412,7 +390,7 @@ void chooseEdit()
 					break;
 				}
 				break;
-			case 3: /*Project Description*/
+			case 2: /*Project Description*/
 				while(1)
 				{
 					printf("Change project description to : \n");
@@ -432,20 +410,19 @@ void chooseEdit()
 						sscanf(stringInput,"%[^\n]",CHOSENPROJECT.description);
 					}
 					printf("\n\n");
-					initGraph(100,1);
 					break;
 				}
 				break;
-			case 4: /*Project Member*/
+			case 3: /*Project Member*/
 				updateMember();
 				break;
-			case 5: /*Task*/
+			case 4: /*Task*/
 				updateTask();
 				break;
-			case 6:	/*Dependency*/
+			case 5:	/*Dependency*/
 				updateDependency();
 				break;
-			case 7:
+			case 6:
 				printf("Back to load menu\n");
 				status = 0;
 				break;

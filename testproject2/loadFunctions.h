@@ -10,13 +10,6 @@
 **********************************************/
 
 /*loadFunctions.c*/
-/*	Ask for the task number that the user wants to
-	edit its status
-	ARGUMENTS:	taskString - the choosen task that the user wanted to edit
-*/
-void chooseTask(char * taskString);
-
-
 
 /*	Show the user what option they have after 
 	successfully load a new file
@@ -26,4 +19,5 @@ void displayOptions();
 /**************************************************************/
 
 /*projectEdit.c*/
+
 void chooseEdit();

@@ -18,6 +18,13 @@
 #include "projectInfo.h"
 #include "ioFunctions.h"
 
+/*void editDepenString(fromTask,toTask)
+{
+	TASK_T * pTask = findVertex(toTask);
+	
+	if(strcmp(pTask->dependencyString);
+}*/
+
 void addDependency()
 {
 	char stringInput[128];	
@@ -41,16 +48,22 @@ void addDependency()
 		pFrom = findVertex(fromTask);
 		if(pFrom == NULL)
 		{
+			printf("Error - Cannot find FROM vertex\n\n");
 			continue;
 		}
 		printf("Enter TO task :");
 		memset(stringInput,0,sizeof(stringInput));
 		fgets(stringInput,sizeof(stringInput),stdin);
 		sscanf(stringInput,"%[^\n]",toTask);
+		if (strcmp(fromTask,toTask) == 0)
+		{
+			printf("Input error - 'From' must be different from 'To'!\n\n");
+		}
 		status = addEdge(fromTask,toTask,pFrom->Duration);
 		if(status == 1)
 		{
-			printf("Linked From | %s | to | %s |\n",fromTask,toTask);
+			printf("Linked From | %s | to | %s |\n\n",fromTask,toTask);
+			//editDepenString(fromTask,toTask);
 		}
 		else if(status == -1)
 		{
@@ -58,7 +71,7 @@ void addDependency()
 		}		
 		else
 		{
-			printf("Error - One or both vertex are not found\n\n");
+			printf("Error - Cannot find TO vertex\n\n");
 		}		
 		pFrom = NULL;
 	}

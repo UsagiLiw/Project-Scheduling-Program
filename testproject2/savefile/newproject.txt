@@ -1,0 +1,8 @@
+newproject;
+1999-03-02;
+NONE;
+pmea,mill,nutt,earth;
+1|1|1|earth||-1;
+2|2|2|mill||-1;
+3|3|3|mill||-1;
+4|4|4|mill||-1;

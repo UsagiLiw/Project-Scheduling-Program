@@ -47,6 +47,9 @@ void printProjectInfo()
 {
 	MEMBER_T * pMember = pHead;
 	VERTEX_T * pVertex = vListHead;
+	VERTEX_T * pVertex2 = NULL;
+	int i,count = 0,depCount;
+	char ** adjacentKeys;
 
 	printf("Project:\n\t%s\n\n",CHOSENPROJECT.projectName);
 	printf("Description:\n\t%s\n\n",CHOSENPROJECT.description);
@@ -59,14 +62,43 @@ void printProjectInfo()
 	
 	while(pVertex != NULL)
 	{
-		printf("\n|%s|\n",pVertex->data->Topic);
-		printf("\t%s\n",pVertex->data->taskDescription);
+		printf("\n | %s |\n",pVertex->data->Topic);
+		printf("Description: %s\n",pVertex->data->taskDescription);
 		printf("Duration: %d days\n",pVertex->data->Duration);
 		printf("Responsible members: %s\n",pVertex->data->taskMember);
 		if(pVertex->data->Status == 1)
 			printf("Status: DONE\n");
 		else
 			printf("Status: IN PROGRESS\n");
+		printf("Requirement: ");
+		/*depCount = 0;
+		while(pVertex2 != NULL)
+		{
+			printf("\n");
+			if(findEdge(pVertex2->key,pVertex->key) > 0)
+			{
+				printf("\t - %s",pVertex2->key);
+				depCount++;
+			}
+			pVertex2 = pVertex2->next;
+		}
+		if(depCount == 0)
+		{
+			printf("No Prior Requirement\n");
+		}*/
+		adjacentKeys = getDependencyVertices(pVertex->key,&count);
+		if(count > 0)
+		{
+			for(i = 0; i < count; i++)
+			{
+				printf("\n\t - %s",adjacentKeys[i]);
+				free(adjacentKeys[i]);
+			}
+			count = 0;
+			free(adjacentKeys);
+		}
+		else
+			printf("No prior requirement\n");
 		pVertex = pVertex->next;
 	}
 	printf("\n\n");
@@ -84,7 +116,7 @@ void breakNames(char * tempNameString)
 	MEMBER_T * pMember = NULL;
 	memCount = 0;
 	token = strtok(tempNameString,",");
-	printf("Member(s):\n");
+	//printf("Member(s):\n");
 	do
 	{
 		pMember = (MEMBER_T*) calloc(1,sizeof(MEMBER_T));
@@ -105,12 +137,12 @@ void breakNames(char * tempNameString)
 				pTail->pNext = pMember;
 			}
 			pTail = pMember;
-			printf("\t- %s\n",token);
+			//printf("\t- %s\n",token);
 			memCount++;
 			token = strtok(NULL,",");
 		}
 	}while(token != NULL);
-	printf("\nFound %d members\n\n",memCount);
+	//printf("\nFound %d members\n\n",memCount);
 }
 
 void saveEdit()
@@ -118,13 +150,12 @@ void saveEdit()
 	FILE * pOut = NULL;
 	MEMBER_T * pMember = NULL;
 	VERTEX_T * pVertex = vListHead;
+	VERTEX_T * pVertex2 = NULL;
 	char nameString[1000];
 	char projectDirectory[] = "savefile/";
 	char fileType[] = ".txt";
-	char comma[] = ",";
-	int count;
-	int i;
-	char** adjacentKeys = NULL;
+	int i,count = 0;
+	char ** adjacentKeys;
 	
 	strcat(projectDirectory,CHOSENPROJECT.projectName);
 	strcat(projectDirectory,fileType);
@@ -149,23 +180,16 @@ void saveEdit()
 		pMember = pMember->pNext; 	
 	}
 	fprintf(pOut,";\n");
-	//nameString[strlen(nameString) - 1] = '\0';/*Take out the extra comma*/
-	//fprintf(pOut,"%s;\n",nameString);
-	fprintf(pOut,"%d;\n",NUMBEROFTASK);
 	while(pVertex != NULL)
 	{
 		fprintf(pOut,"%s|%s|%d|",pVertex->data->Topic
 							,pVertex->data->taskDescription
 							,pVertex->data->Duration);
 		fprintf(pOut,"%s|",pVertex->data->taskMember);
-		adjacentKeys = getAdjacentVertices(pVertex->data->Topic,&count);
-		if (count == 0)
+		adjacentKeys = getDependencyVertices(pVertex->key,&count);
+		if(count > 0)
 		{
-			fprintf(pOut,"NONE");
-		}
-		else
-		{
-			for (i = 0; i < count; i++)
+			for(i = 0; i < count; i++)
 			{
 				fprintf(pOut,"%s",adjacentKeys[i]);
 				if(i < count - 1)
@@ -175,6 +199,10 @@ void saveEdit()
 				free(adjacentKeys[i]);
 			}
 			free(adjacentKeys);
+		}
+		else
+		{
+			fprintf(pOut,"NONE");
 		}
 		fprintf(pOut,"|%d;\n",pVertex->data->Status);	
 		pVertex = pVertex->next;

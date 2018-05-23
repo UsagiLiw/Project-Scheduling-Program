@@ -47,12 +47,13 @@ int loadFunction(int choice)
 	{
 		case 1:	/*Create new project*/
 			printf("Create new project\n\n");
+			memset(thisProject,0,sizeof(thisProject));
 			NUMBEROFTASK = 0;
 			memCount = 0;
 			newProject();
-			printf("\n\n");
-			printProjectInfo();
 			addDependency();
+			printProjectInfo();
+			printCriticalPath();
 			saveEdit();
 			printf("\tSuccessfully create project: %s\n\n",thisProject);
 			clearGraph();
@@ -60,10 +61,12 @@ int loadFunction(int choice)
 			break;
 		case 2: /*Load existing project and choose the actions*/
 			printf("Load existing project\n");
+			memset(thisProject,0,sizeof(thisProject));
 			NUMBEROFTASK = 0;
 			projectNameList();
 			if(chooseProject() != 0)
 			{
+				printProjectInfo();
 				printCriticalPath();
 				displayOptions();
 			}
